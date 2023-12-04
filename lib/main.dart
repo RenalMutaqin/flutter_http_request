@@ -22,69 +22,75 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => _MyWidgetState();
 }
 
-class _HomePageState extends State<HomePage> {
-  late String id;
-  late String email;
-  late String name;
-  @override
-  void initState() {
-    id = "";
-    email = "";
-    name = "";
-    // TODO: implement initState
-    super.initState();
-  }
+class _MyWidgetState extends State<HomePage> {
+  TextEditingController nameC = TextEditingController();
+  TextEditingController jobC = TextEditingController();
 
+  String hasilResponse = "Belum ada data";
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("HTTP Request Get"),
+        title: Text("HTTP Request Post"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "ID : $id",
-              style: TextStyle(fontSize: 20),
-            ),
-            Text(
-              "Email : $email",
-              style: TextStyle(fontSize: 20),
-            ),
-            Text(
-              "Nama : $name",
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            ElevatedButton(
+      body: ListView(
+        padding: EdgeInsets.all(20),
+        children: [
+          TextField(
+            controller: nameC,
+            autocorrect: false,
+            keyboardType: TextInputType.text,
+            decoration: InputDecoration(
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                labelText: "Name"),
+          ),
+          SizedBox(
+            height: 12,
+          ),
+          TextField(
+            controller: jobC,
+            autocorrect: false,
+            keyboardType: TextInputType.text,
+            decoration: InputDecoration(
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                labelText: "Job"),
+          ),
+          SizedBox(
+            height: 12,
+          ),
+          ElevatedButton(
               onPressed: () async {
-                var response =
-                    await http.get(Uri.parse("https://reqres.in/api/users/2"));
-                if (response.statusCode == 200) {
-                  //berhasil get data
-                  print("Berhasil get data");
-                  var data = jsonDecode(response.body) as Map<String, dynamic>;
-                  print(data["data"]);
-                  setState(() {
-                    id = data["data"]["id"].toString();
-                    email = data["data"]["email"].toString();
-                    name =
-                        "${data["data"]["first_name"]} ${data["data"]["last_name"]}";
-                  });
-                } else {
-                  print("Error ${response.statusCode}");
-                }
+                var myresponse = await http.post(
+                    Uri.parse("https://reqres.in/api/users"),
+                    body: {"name": nameC.text, "job": jobC.text});
+
+                Map<String, dynamic> data =
+                    jsonDecode(myresponse.body) as Map<String, dynamic>;
+                setState(() {
+                  hasilResponse = "${data['name']} - ${data['job']}";
+                });
               },
-              child: Text("Get Data"),
-            ),
-          ],
-        ),
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12))),
+              child: Text("Submit")),
+          SizedBox(
+            height: 50,
+          ),
+          Divider(
+            color: Colors.black,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Text(hasilResponse),
+        ],
       ),
     );
   }
